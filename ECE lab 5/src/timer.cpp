@@ -6,43 +6,25 @@ unsigned int count=0; //used to keep track of how many ms or us have passed
 
 void initTimer1()
 {
-    //setting time1 up in CTC mode
-    TCCR1A &= ~(1 << WGM10);
-    TCCR1A &= ~(1 << WGM11);     
-    TCCR1B |= (1 << WGM12);
-    TCCR1B &= ~(1 << WGM13);
+    TCCR1A &= ~(1 << WGM00); // Set timer to be in CTC mode, quick note this timer should not turn on
+    TCCR1A |= (1 << WGM01);
+    TCCR1B &= ~(1 << WGM02);
+
+    TCCR1B |= (1 << CS01) | (1 << CS00); // Sets the prescaler to 64
+    //Set output compare registers to proper values
+    OCR1A = 249; //Set count to 250
 }
 
-void delayMs(unsigned int delay)
-{
-    //set up prescaler of 1024
-    //this also starts the timer
-    TCCR1B |= (1 << CS10);
-    TCCR1B |= (1 << CS11);
-    TCCR1B &= ~(1 << CS12);
-
-    OCR1A = 250;//number of counts for a us
-
-    TCNT1 = 0; //initialize counter to 0
-    count = 0; //look at description for ms delay
-
-    TIFR1 |= (1 << OCF1A); //puts the timer interrupt flag down
-
-    //at this point our timer is counting and when it reaches the value
-    //in the OCR0A register the TIFR0 flag will go up
-
-    while(count < delay) //until we have waited the desired amount of us
+void delayMs(unsigned int delay){
+    unsigned int delayCnt = 0;
+    TCNT1 = 0; //starting the timer at 0 instead of some random junk number
+    TIFR1 |= (1 << OCF1A); // set compare flag to start timer
+    
+    while (delayCnt < delay) 
     {
-        if(TIFR1 & (1 << OCF1A)) //if we have reached our allotted time to set the flag again
-        {
-            count++;
-            TIFR1 |= (1 << OCF1A); //reset the timer interrrupt flag to 0.
+        if (TIFR1 & (1 << OCF1A)) { //increment only while the flag is set
+            delayCnt++;
+            TIFR1 |= (1 << OCF1A); //re-start timer. will go to 0 before reaching the if statement above
         }
     }
-
-    //turn the timer off
-    TCCR1B &= ~(1 << CS10);
-    TCCR1B &= ~(1 << CS11);
-    TCCR1B &= ~(1 << CS12);
-
 }

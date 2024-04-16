@@ -1,7 +1,6 @@
 #ifndef SWITCH_H
 #define SWITCH_H
-#include "switch.h"
 
-void initSwitchPB7(); 
+void initSwitchPB3();
 
 #endif
