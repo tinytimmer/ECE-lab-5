@@ -6,9 +6,9 @@
 
 //define to make this work with explanation here
 #define DDR_SPI DDRB // Data Direction Register on ATMEGA2560 for SPI is DDRB
-#define DD_SS DDB0  // 53 SS Chip Select data direction bit B0 of ATMEGA2560 is DDB0
-#define DD_SCK DDB1  // 52 Clock pin connection data direction bit B1 on ATMEGA2560 is DDB1
-#define DD_MOSI DDB2 // 51 MOSI pin datadirection on ATMEGA2560 is DDB2
+#define DD_SS DDB0  // pin 53 SS Chip Select data direction bit B0 of ATMEGA2560 is DDB0
+#define DD_SCK DDB1  // pin 52 Clock pin connection data direction bit B1 on ATMEGA2560 is DDB1
+#define DD_MOSI DDB2 // pin 51 MOSI pin datadirection on ATMEGA2560 is DDB2
 #define SPI_PORT PORTB // PortB for SPI on ATMEGA2560 is PORTB
 #define SPI_SS_BIT PORTB0 // Port B register Bit B0 of Chip Select on ATMEGA2560 is PORTB0
 
@@ -16,9 +16,9 @@
 #define wait_complete while(!(SPSR & (1 << SPIF)));
 
 void SPI_MASTER_Init(){
-    // set MOSI,SCK,and SS direction to outputs
+    // set MOSI, SCK, and SS direction to outputs
     //quick note: program does not use MISO line. IT only writes to device
-    DDR_SPI = (1 << DD_MOSI)| (1 << DD_SCK) | (1 << DD_SS);
+    DDR_SPI = (1 << DD_MOSI)|(1 << DD_SCK)|(1 << DD_SS);
 
     // set SS high initially (chip select off)
     SPI_PORT  |= (1 << SPI_SS_BIT);
