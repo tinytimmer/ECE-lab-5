@@ -18,7 +18,7 @@
 #define MPU_ZOUT_L 0x40
 #define MPU_WHO_AM_I 0x68        //I2C addy
 #define MPU_PWR_MANAGEMENT_1_REG 0x6B  
-#define MPU_PWR_CONFIG  0x09 //sets internal accel clock to X-gyro for improved stability (datasheet recommended) 
+#define MPU_PWR_CONFIG  0x00 //sets internal accel clock to X-gyro for improved stability (datasheet recommended) 
                              //disables temp sensor (not needed for this lab)
                              //wakes up device
 #define MPU_PWR_RESET 0x70  //resets all registers in accel to defaults
@@ -36,4 +36,7 @@ void initAccelerometer(){
     write(MPU_PWR_CONFIG);
     // Serial.println(TWSR & (0xF8),HEX); // print out status register to verify transmission, use to check
     // Serial.flush();
+
+    StopI2C_Trans(); //stop i2c transmission with MPU. 
+
 }
