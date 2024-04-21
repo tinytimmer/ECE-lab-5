@@ -66,7 +66,8 @@ signed int yGyro = 0;
 signed int zGyro = 0;
 signed int xGyro = 0;
 
-bool reEnable = true;
+volatile bool reEnable = true;
+bool smiling = true;
 
 int main()
 {
@@ -81,12 +82,14 @@ int main()
   initSwitchPB3();
   initI2C();
   initAccelerometer();
+  write_smile(); //Initialize with a smile. Smiling boolean is true.
 
-  Serial.println("Start");
+  //Turn off noise to begin with. 
+  changeFrequency(100);
+  changeFrequency(0); 
 
   while (1)
   {
-    StartI2C_Trans(MPU_WHO_AM_I); //establish accel slave i2c address
     Read_from(MPU_WHO_AM_I, MPU_XOUT_L);
     x = Read_data();
     Read_from(MPU_WHO_AM_I, MPU_XOUT_H);
@@ -133,21 +136,27 @@ int main()
     //switch for button press
     switch(state) {
       case wait_press:
-        if(chirpOn) {
-          setVolume(40);
-          delayMs(40);
+        if(chirpOn) { //chirp loop. 
+          delayMs(1);
+          for(int i = 1000; i < 4000; i+=2) {
+            changeFrequency(i); 
+            delayMs(1);
+          }
         }
+        changeFrequency(0);
+        delayMs(1);
         break;
       case debounce_press:
         delayMs(1); //Adds delay to account for debounce period
         state = wait_release;
         break;
       case wait_release: 
+        //System check of state. Due to the system waiting for the chirp continue.
+        if (!chirpOn)
+          state = debounce_release;
       break;
       case debounce_release: //Add delay to account for debounce period
         delayMs(1);
-        setVolume(0);
-        delayMs(40);
         state = wait_press;
         break;
     }
@@ -155,18 +164,23 @@ int main()
     //switch for accelerometer which controls when the chirp starts and stops
     switch (accelerometerState) {
       case above_threshold:
-        if (reEnable) {
+         if (reEnable) { //If the system has gone back to a smile
           chirpOn = true;
         }
-        write_frown();
+        if (smiling) { //prevent writing a frown if not needed. 
+          write_frown();
+          smiling = false;
+        }
         reEnable = false;
         break;
       case below_threshold:
         reEnable = true;
-        write_smile();
+        if (!smiling){ //Prevent writing a smile if not needed. 
+          write_smile();
+          smiling = true;
+        }
         break;
     }
-
   }
 
 }
